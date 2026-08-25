@@ -224,3 +224,4 @@ credentials.json
 gcloud-key.json
 .env
 .env.*
+env.ps1
