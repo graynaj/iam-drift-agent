@@ -1,0 +1,14 @@
+6 change(s) against baseline
+
++ [low     ] roles/aiplatform.user
+             serviceaccount:audit-agent-sa@iam-drift-agent.iam.gserviceaccount.com  (none, 42d1dbc04ef850e7)
++ [low     ] roles/artifactregistry.serviceAgent
+             serviceaccount:service-283566602051@gcp-sa-artifactregistry.iam.gserviceaccount.com  (none, 9a79a23e88499b42)
++ [low     ] roles/datastore.user
+             serviceaccount:audit-agent-sa@iam-drift-agent.iam.gserviceaccount.com  (none, db5efbc73a926dbc)
++ [low     ] roles/iam.securityReviewer
+             serviceaccount:audit-agent-sa@iam-drift-agent.iam.gserviceaccount.com  (none, d10e0f6e737407a9)
++ [high    ] roles/iam.serviceAccountTokenCreator
+             serviceaccount:service-283566602051@gcp-sa-pubsub.iam.gserviceaccount.com  (privilege-escalation-path, dc544364cb630d0b)
++ [low     ] roles/logging.serviceAgent
+             serviceaccount:service-283566602051@gcp-sa-logging.iam.gserviceaccount.com  (none, 48015b913f721978)
