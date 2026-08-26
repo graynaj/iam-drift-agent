@@ -45,3 +45,24 @@ project's known state; bindings that appear afterwards are drift.
 
 The first drift the agent should report is therefore its own service account —
 created after the baseline, with three roles attached.
+
+## F-03 — The agent flagged an over-broad grant in its own infrastructure
+
+**Observed:** 2026-08-26
+
+Push subscriptions need the Pub/Sub service agent to mint OIDC tokens, which
+requires `roles/iam.serviceAccountTokenCreator`. It was granted at project
+level — the common shortcut, and what most tutorials show.
+
+The agent's assessment of its own project flagged this as HIGH and recommended
+scoping the grant to the specific service account Pub/Sub impersonates
+(`pubsub-pusher`) rather than the project. That is correct: at project level,
+the service agent can impersonate any service account in the project, including
+`audit-agent-sa`.
+
+This was not a planted example. The finding surfaced when the drift engine was
+first run against a live snapshot, and it concerns a permission granted a few
+hours earlier while building the agent itself.
+
+Deliberately left in place for the demo recording; the scoped grant is the
+correct configuration and is noted in Future work.
