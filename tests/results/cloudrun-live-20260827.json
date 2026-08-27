@@ -1,0 +1,72 @@
+[
+  {
+    "insertId": "6a90541900067be7f27063e4",
+    "jsonPayload": {
+      "actor": "GrazynaJunska@gmail.com",
+      "fingerprint": "2cf14ae2c068ce79",
+      "floor": "low",
+      "insertId": "33h4yde4zadm",
+      "level": "low",
+      "member": "user:grazynajunska@gmail.com",
+      "message": "IAM DRIFT [LOW] roles/browser -> user:grazynajunska@gmail.com",
+      "msg_id": "21375088465440608",
+      "raised_from": null,
+      "reasoning": "The Browser role grants read-only access to inspect the GCP resource hierarchy without allowing access to underlying resource data or configurations. While granted to an external Gmail account, the permissions are minimal and present negligible security risk.",
+      "recommendation": "Verify that user:grazynajunska@gmail.com is an authorized collaborator who requires visibility into the project hierarchy.",
+      "role": "roles/browser",
+      "rule": "none"
+    },
+    "labels": {
+      "instanceId": "00a41e8c1d59ea5f12f6c050fa08a03af6a77a67db6beb9e3869bd5be234da7766a3c8e0600f102ce97fcdd320656c2348c9355fcd3de1990836d8dbbd9738ff561e891a6b99b66f75f5e6d1c37d68"
+    },
+    "logName": "projects/iam-drift-agent/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-08-27T15:13:29.512982871Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "iam-drift-agent",
+        "location": "europe-west1",
+        "project_id": "iam-drift-agent",
+        "revision_name": "iam-drift-agent-00003-85c",
+        "service_name": "iam-drift-agent"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "NOTICE",
+    "timestamp": "2026-08-27T15:13:29.424935Z"
+  },
+  {
+    "insertId": "6a904b140002bb88617947f5",
+    "jsonPayload": {
+      "actor": "GrazynaJunska@gmail.com",
+      "fingerprint": "2cf14ae2c068ce79",
+      "floor": "low",
+      "insertId": "-eeujzre5669i",
+      "level": "low",
+      "member": "user:grazynajunska@gmail.com",
+      "message": "IAM DRIFT [LOW] roles/browser -> user:grazynajunska@gmail.com",
+      "msg_id": "replay-push-add",
+      "raised_from": null,
+      "reasoning": "The roles/browser role provides read-only access to inspect the project hierarchy without granting access to view underlying resource data or make modifications. Although assigned to an external Gmail account, the risk remains minimal due to the role's limited scope.",
+      "recommendation": "Verify that this user requires hierarchy browsing permissions and consider replacing the personal Gmail address with a corporate identity.",
+      "role": "roles/browser",
+      "rule": "none"
+    },
+    "labels": {
+      "instanceId": "00a41e8c1d955338f645b085813ca62262d6249ee3557a31626520ef8daf0dc4bfd82d356129f401d50f684be455ac5508efe1d30a1adbbbd74c4c485792abd98c9f6c6483321f25fcfc623c190976"
+    },
+    "logName": "projects/iam-drift-agent/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-08-27T14:35:00.189267643Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "iam-drift-agent",
+        "location": "europe-west1",
+        "project_id": "iam-drift-agent",
+        "revision_name": "iam-drift-agent-00003-85c",
+        "service_name": "iam-drift-agent"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "NOTICE",
+    "timestamp": "2026-08-27T14:35:00.179080Z"
+  }
+]

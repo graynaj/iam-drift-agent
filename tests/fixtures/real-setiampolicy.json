@@ -1,0 +1,266 @@
+[
+  {
+    "insertId": "17tkoe4g8nc",
+    "logName": "projects/iam-drift-agent/logs/cloudaudit.googleapis.com%2Factivity",
+    "protoPayload": {
+      "@type": "type.googleapis.com/google.cloud.audit.AuditLog",
+      "authenticationInfo": {
+        "oauthInfo": {
+          "oauthClientId": "32555940559.apps.googleusercontent.com"
+        },
+        "principalEmail": "GrazynaJunska@gmail.com",
+        "principalSubject": "user:GrazynaJunska@gmail.com"
+      },
+      "authorizationInfo": [
+        {
+          "granted": true,
+          "permission": "resourcemanager.projects.setIamPolicy",
+          "permissionType": "ADMIN_WRITE",
+          "resource": "projects/iam-drift-agent",
+          "resourceAttributes": {
+            "name": "projects/iam-drift-agent",
+            "service": "cloudresourcemanager.googleapis.com",
+            "type": "cloudresourcemanager.googleapis.com/Project"
+          }
+        },
+        {
+          "granted": true,
+          "permission": "resourcemanager.projects.setIamPolicy",
+          "permissionType": "ADMIN_WRITE",
+          "resource": "projects/iam-drift-agent",
+          "resourceAttributes": {
+            "name": "projects/iam-drift-agent",
+            "service": "cloudresourcemanager.googleapis.com",
+            "type": "cloudresourcemanager.googleapis.com/Project"
+          }
+        }
+      ],
+      "methodName": "SetIamPolicy",
+      "request": {
+        "@type": "type.googleapis.com/google.iam.v1.SetIamPolicyRequest",
+        "policy": {
+          "bindings": [
+            {
+              "members": [
+                "serviceAccount:audit-agent-sa@iam-drift-agent.iam.gserviceaccount.com"
+              ],
+              "role": "roles/aiplatform.user"
+            },
+            {
+              "members": [
+                "serviceAccount:service-283566602051@gcp-sa-artifactregistry.iam.gserviceaccount.com"
+              ],
+              "role": "roles/artifactregistry.serviceAgent"
+            },
+            {
+              "members": [
+                "serviceAccount:283566602051@cloudbuild.gserviceaccount.com"
+              ],
+              "role": "roles/cloudbuild.builds.builder"
+            },
+            {
+              "members": [
+                "serviceAccount:service-283566602051@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+              ],
+              "role": "roles/cloudbuild.serviceAgent"
+            },
+            {
+              "members": [
+                "serviceAccount:service-283566602051@containerregistry.iam.gserviceaccount.com"
+              ],
+              "role": "roles/containerregistry.ServiceAgent"
+            },
+            {
+              "members": [
+                "serviceAccount:audit-agent-sa@iam-drift-agent.iam.gserviceaccount.com"
+              ],
+              "role": "roles/datastore.user"
+            },
+            {
+              "members": [
+                "serviceAccount:283566602051-compute@developer.gserviceaccount.com"
+              ],
+              "role": "roles/editor"
+            },
+            {
+              "members": [
+                "serviceAccount:service-283566602051@firebase-rules.iam.gserviceaccount.com"
+              ],
+              "role": "roles/firebaserules.system"
+            },
+            {
+              "members": [
+                "serviceAccount:service-283566602051@gcp-sa-firestore.iam.gserviceaccount.com"
+              ],
+              "role": "roles/firestore.serviceAgent"
+            },
+            {
+              "members": [
+                "serviceAccount:audit-agent-sa@iam-drift-agent.iam.gserviceaccount.com"
+              ],
+              "role": "roles/iam.securityReviewer"
+            },
+            {
+              "members": [
+                "serviceAccount:service-283566602051@gcp-sa-pubsub.iam.gserviceaccount.com"
+              ],
+              "role": "roles/iam.serviceAccountTokenCreator"
+            },
+            {
+              "members": [
+                "serviceAccount:service-283566602051@gcp-sa-logging.iam.gserviceaccount.com"
+              ],
+              "role": "roles/logging.serviceAgent"
+            },
+            {
+              "members": [
+                "user:GrazynaJunska@gmail.com"
+              ],
+              "role": "roles/owner"
+            },
+            {
+              "members": [
+                "serviceAccount:service-283566602051@gcp-sa-pubsub.iam.gserviceaccount.com"
+              ],
+              "role": "roles/pubsub.serviceAgent"
+            },
+            {
+              "members": [
+                "serviceAccount:service-283566602051@serverless-robot-prod.iam.gserviceaccount.com"
+              ],
+              "role": "roles/run.serviceAgent"
+            }
+          ],
+          "etag": "BwZZ8ksuhjo="
+        },
+        "resource": "iam-drift-agent"
+      },
+      "requestMetadata": {
+        "callerIp": "37.109.165.237",
+        "callerSuppliedUserAgent": "google-cloud-sdk gcloud/581.0.0 command/gcloud.projects.remove-iam-policy-binding invocation-id/7b65cad8ec1d4bd59d0008932d8e4617 environment/None environment-version/None client-os/WINDOWS client-os-ver/10.0.26200 client-pltf-arch/x86_64 interactive/True from-script/False python/3.14.6 term/  (Windows NT 10.0.26200),gzip(gfe)",
+        "destinationAttributes": {},
+        "requestAttributes": {}
+      },
+      "resourceName": "projects/iam-drift-agent",
+      "response": {
+        "@type": "type.googleapis.com/google.iam.v1.Policy",
+        "bindings": [
+          {
+            "members": [
+              "serviceAccount:audit-agent-sa@iam-drift-agent.iam.gserviceaccount.com"
+            ],
+            "role": "roles/aiplatform.user"
+          },
+          {
+            "members": [
+              "serviceAccount:service-283566602051@gcp-sa-artifactregistry.iam.gserviceaccount.com"
+            ],
+            "role": "roles/artifactregistry.serviceAgent"
+          },
+          {
+            "members": [
+              "serviceAccount:283566602051@cloudbuild.gserviceaccount.com"
+            ],
+            "role": "roles/cloudbuild.builds.builder"
+          },
+          {
+            "members": [
+              "serviceAccount:service-283566602051@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+            ],
+            "role": "roles/cloudbuild.serviceAgent"
+          },
+          {
+            "members": [
+              "serviceAccount:service-283566602051@containerregistry.iam.gserviceaccount.com"
+            ],
+            "role": "roles/containerregistry.ServiceAgent"
+          },
+          {
+            "members": [
+              "serviceAccount:audit-agent-sa@iam-drift-agent.iam.gserviceaccount.com"
+            ],
+            "role": "roles/datastore.user"
+          },
+          {
+            "members": [
+              "serviceAccount:283566602051-compute@developer.gserviceaccount.com"
+            ],
+            "role": "roles/editor"
+          },
+          {
+            "members": [
+              "serviceAccount:service-283566602051@firebase-rules.iam.gserviceaccount.com"
+            ],
+            "role": "roles/firebaserules.system"
+          },
+          {
+            "members": [
+              "serviceAccount:service-283566602051@gcp-sa-firestore.iam.gserviceaccount.com"
+            ],
+            "role": "roles/firestore.serviceAgent"
+          },
+          {
+            "members": [
+              "serviceAccount:audit-agent-sa@iam-drift-agent.iam.gserviceaccount.com"
+            ],
+            "role": "roles/iam.securityReviewer"
+          },
+          {
+            "members": [
+              "serviceAccount:service-283566602051@gcp-sa-pubsub.iam.gserviceaccount.com"
+            ],
+            "role": "roles/iam.serviceAccountTokenCreator"
+          },
+          {
+            "members": [
+              "serviceAccount:service-283566602051@gcp-sa-logging.iam.gserviceaccount.com"
+            ],
+            "role": "roles/logging.serviceAgent"
+          },
+          {
+            "members": [
+              "user:GrazynaJunska@gmail.com"
+            ],
+            "role": "roles/owner"
+          },
+          {
+            "members": [
+              "serviceAccount:service-283566602051@gcp-sa-pubsub.iam.gserviceaccount.com"
+            ],
+            "role": "roles/pubsub.serviceAgent"
+          },
+          {
+            "members": [
+              "serviceAccount:service-283566602051@serverless-robot-prod.iam.gserviceaccount.com"
+            ],
+            "role": "roles/run.serviceAgent"
+          }
+        ],
+        "etag": "BwZZ8t7BTqo="
+      },
+      "serviceData": {
+        "@type": "type.googleapis.com/google.iam.v1.logging.AuditData",
+        "policyDelta": {
+          "bindingDeltas": [
+            {
+              "action": "REMOVE",
+              "member": "user:grazynajunska@gmail.com",
+              "role": "roles/browser"
+            }
+          ]
+        }
+      },
+      "serviceName": "cloudresourcemanager.googleapis.com",
+      "status": {}
+    },
+    "receiveTimestamp": "2026-08-26T13:05:15.452363874Z",
+    "resource": {
+      "labels": {
+        "project_id": "iam-drift-agent"
+      },
+      "type": "project"
+    },
+    "severity": "NOTICE",
+    "timestamp": "2026-08-26T13:05:13.523395Z"
+  }
+]

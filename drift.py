@@ -56,11 +56,12 @@ def load_bindings(source) -> set[tuple[str, str]]:
 
 @dataclass(frozen=True)
 class DriftFinding:
-    change: str          # "granted" or "revoked"
+    change: str                # "granted" or "revoked"
     role: str
-    member: str
-    floor: str           # deterministic minimum severity
-    rule: str            # which rule set the floor, or "none"
+    member: str                # normalized: comparisons and fingerprint
+    floor: str                 # deterministic minimum severity
+    rule: str                  # which rule set the floor, or "none"
+    member_raw: str = ""       # original spelling: display and commands
 
     @property
     def fingerprint(self) -> str:

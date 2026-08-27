@@ -1,10 +1,25 @@
-"""Cloud Run receiver for IAM audit and asset events."""
+"""Cloud Run receiver for IAM audit and asset events.
+
+/audit runs deterministic drift detection, then asks the model to assess
+each finding. The rule-based floor wins: the model may raise severity,
+never lower it.
+"""
 
 import base64
 import json
+import logging
+
 from flask import Flask, request
 
+from audit import actor, to_findings
+from risk import assess
+
+logging.getLogger("google_genai.models").setLevel(logging.ERROR)
+
 app = Flask(__name__)
+
+LEVELS = ["low", "medium", "high", "critical"]
+MAX_ASSESSMENTS = 5  # stay inside the push ack deadline
 
 
 def unwrap(envelope):
@@ -20,22 +35,58 @@ def unwrap(envelope):
     return msg.get("messageId"), payload
 
 
+def emit(severity, message, **fields):
+    """Cloud Run turns JSON on stdout into structured log entries."""
+    print(json.dumps({"severity": severity, "message": message, **fields}),
+          flush=True)
+
+
 @app.post("/audit")
 def audit():
-    msg_id, payload = unwrap(request.get_json(silent=True))
+    envelope = request.get_json(silent=True)
+    msg_id, payload = unwrap(envelope)
+
     if msg_id is None:
-        return ("bad envelope", 400)
-    p = payload.get("protoPayload", {})
-    print(json.dumps({
-        "source": "audit",
-        "msg_id": msg_id,
-        "actor": p.get("authenticationInfo", {}).get("principalEmail"),
-        "method": p.get("methodName"),
-        "service": p.get("serviceName"),
-        "resource": p.get("resourceName"),
-        "timestamp": payload.get("timestamp"),
-    }), flush=True)
-    return ("", 204)
+        emit("INFO", "bad or empty envelope")
+        return ("", 204)
+
+    try:
+        who = actor(payload)
+        insert_id = payload.get("insertId", "unknown")
+        findings = to_findings(payload)
+
+        if not findings:
+            emit("INFO", "no drift in event", msg_id=msg_id,
+                 insertId=insert_id, actor=who,
+                 method=payload.get("protoPayload", {}).get("methodName"))
+            return ("", 204)
+
+        for f in findings[:MAX_ASSESSMENTS]:
+            if f.change == "revoked":
+                emit("INFO", "permission revoked", role=f.role,
+                     member=f.member_raw, actor=who,
+                     fingerprint=f.fingerprint, msg_id=msg_id)
+                continue
+
+            a = assess(f.as_event())
+            final, raised = a.level, None
+            if LEVELS.index(a.level) < LEVELS.index(f.floor):
+                final, raised = f.floor, a.level
+
+            emit("WARNING" if final in ("high", "critical") else "NOTICE",
+                 f"IAM DRIFT [{final.upper()}] {f.role} -> {f.member_raw}",
+                 level=final, floor=f.floor, rule=f.rule, raised_from=raised,
+                 role=f.role, member=f.member_raw, actor=who,
+                 reasoning=a.reasoning, recommendation=a.recommendation,
+                 fingerprint=f.fingerprint, insertId=insert_id, msg_id=msg_id)
+
+        return ("", 204)
+
+    except Exception as exc:
+        # Never 500 here: a non-2xx makes Pub/Sub redeliver, and at-least-once
+        # turns one parser bug into an unbounded retry loop against the model.
+        emit("ERROR", "audit handler failed", error=repr(exc), msg_id=msg_id)
+        return ("", 204)
 
 
 @app.post("/asset")
