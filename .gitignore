@@ -225,3 +225,5 @@ gcloud-key.json
 .env
 .env.*
 env.ps1
+*.bak
+docs/session-history-*.txt

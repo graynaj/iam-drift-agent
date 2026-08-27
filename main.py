@@ -2,7 +2,8 @@
 
 /audit runs deterministic drift detection, then asks the model to assess
 each finding. The rule-based floor wins: the model may raise severity,
-never lower it.
+never lower it. Findings are persisted in Firestore keyed by fingerprint,
+so redelivery updates a counter instead of creating a duplicate.
 """
 
 import base64
@@ -13,6 +14,7 @@ from flask import Flask, request
 
 from audit import actor, to_findings
 from risk import assess
+from store import record
 
 logging.getLogger("google_genai.models").setLevel(logging.ERROR)
 
@@ -63,9 +65,11 @@ def audit():
 
         for f in findings[:MAX_ASSESSMENTS]:
             if f.change == "revoked":
+                is_new, seen = record(f, actor=who)
                 emit("INFO", "permission revoked", role=f.role,
                      member=f.member_raw, actor=who,
-                     fingerprint=f.fingerprint, msg_id=msg_id)
+                     fingerprint=f.fingerprint, msg_id=msg_id,
+                     is_new=is_new, times_seen=seen)
                 continue
 
             a = assess(f.as_event())
@@ -73,12 +77,16 @@ def audit():
             if LEVELS.index(a.level) < LEVELS.index(f.floor):
                 final, raised = f.floor, a.level
 
+            is_new, seen = record(f, assessment=a, actor=who,
+                                  final_level=final, raised_from=raised)
+
             emit("WARNING" if final in ("high", "critical") else "NOTICE",
                  f"IAM DRIFT [{final.upper()}] {f.role} -> {f.member_raw}",
                  level=final, floor=f.floor, rule=f.rule, raised_from=raised,
                  role=f.role, member=f.member_raw, actor=who,
                  reasoning=a.reasoning, recommendation=a.recommendation,
-                 fingerprint=f.fingerprint, insertId=insert_id, msg_id=msg_id)
+                 fingerprint=f.fingerprint, insertId=insert_id, msg_id=msg_id,
+                 is_new=is_new, times_seen=seen)
 
         return ("", 204)
 

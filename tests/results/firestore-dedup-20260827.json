@@ -1,0 +1,106 @@
+[
+  {
+    "insertId": "6a907245000766127367e353",
+    "jsonPayload": {
+      "actor": "GrazynaJunska@gmail.com",
+      "fingerprint": "2cf14ae2c068ce79",
+      "floor": "low",
+      "insertId": "6zvpkze59864",
+      "is_new": false,
+      "level": "low",
+      "member": "user:grazynajunska@gmail.com",
+      "message": "IAM DRIFT [LOW] roles/browser -> user:grazynajunska@gmail.com",
+      "msg_id": "21378703892840699",
+      "raised_from": null,
+      "reasoning": "The Browser role provides minimal read-only access to view the project hierarchy and metadata without allowing access to underlying resource configurations or data. Although granted to a personal Gmail account, the lack of data access or modification capabilities keeps the overall security risk low.",
+      "recommendation": "Confirm whether the external user requires access and consider migrating access to an organization-managed account.",
+      "role": "roles/browser",
+      "rule": "none",
+      "times_seen": 6
+    },
+    "labels": {
+      "instanceId": "00a41e8c1df27ddb93cf06f7d5df399aaecaec8bc039faf83a302e2ce1b64880082bb81b3816e8ade288db5fa811d985696a1fb9b0cd7ed3c36e1a212137e837bb68cdee154167c9dd482f8db77286ac"
+    },
+    "logName": "projects/iam-drift-agent/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-08-27T17:22:13.787140358Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "iam-drift-agent",
+        "location": "europe-west1",
+        "project_id": "iam-drift-agent",
+        "revision_name": "iam-drift-agent-00004-xtb",
+        "service_name": "iam-drift-agent"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "NOTICE",
+    "timestamp": "2026-08-27T17:22:13.484882Z"
+  },
+  {
+    "insertId": "6a9071f50007abfc476d11e1",
+    "jsonPayload": {
+      "actor": "GrazynaJunska@gmail.com",
+      "fingerprint": "8889bf51262bd1a7",
+      "is_new": true,
+      "member": "user:grazynajunska@gmail.com",
+      "message": "permission revoked",
+      "msg_id": "21379195196170438",
+      "role": "roles/browser",
+      "times_seen": 1
+    },
+    "labels": {
+      "instanceId": "00a41e8c1df27ddb93cf06f7d5df399aaecaec8bc039faf83a302e2ce1b64880082bb81b3816e8ade288db5fa811d985696a1fb9b0cd7ed3c36e1a212137e837bb68cdee154167c9dd482f8db77286ac"
+    },
+    "logName": "projects/iam-drift-agent/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-08-27T17:20:53.738016178Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "iam-drift-agent",
+        "location": "europe-west1",
+        "project_id": "iam-drift-agent",
+        "revision_name": "iam-drift-agent-00004-xtb",
+        "service_name": "iam-drift-agent"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "INFO",
+    "timestamp": "2026-08-27T17:20:53.502780Z"
+  },
+  {
+    "insertId": "6a90706200021f01cec86bca",
+    "jsonPayload": {
+      "actor": "GrazynaJunska@gmail.com",
+      "fingerprint": "2cf14ae2c068ce79",
+      "floor": "low",
+      "insertId": "-eeujzre5669i",
+      "is_new": false,
+      "level": "low",
+      "member": "user:grazynajunska@gmail.com",
+      "message": "IAM DRIFT [LOW] roles/browser -> user:grazynajunska@gmail.com",
+      "msg_id": "replay-push-add",
+      "raised_from": null,
+      "reasoning": "The Browser role (roles/browser) only grants read-only access to browse the hierarchy and metadata of project resources without exposing sensitive data. Because it lacks permissions to modify configurations or read underlying data, this grant presents minimal security risk.",
+      "recommendation": "Verify that the external user grazynajunska@gmail.com is an authorized collaborator who requires metadata visibility into the project.",
+      "role": "roles/browser",
+      "rule": "none",
+      "times_seen": 5
+    },
+    "labels": {
+      "instanceId": "00a41e8c1df27ddb93cf06f7d5df399aaecaec8bc039faf83a302e2ce1b64880082bb81b3816e8ade288db5fa811d985696a1fb9b0cd7ed3c36e1a212137e837bb68cdee154167c9dd482f8db77286ac"
+    },
+    "logName": "projects/iam-drift-agent/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-08-27T17:14:10.145918076Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "iam-drift-agent",
+        "location": "europe-west1",
+        "project_id": "iam-drift-agent",
+        "revision_name": "iam-drift-agent-00004-xtb",
+        "service_name": "iam-drift-agent"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "NOTICE",
+    "timestamp": "2026-08-27T17:14:10.139009Z"
+  }
+]
