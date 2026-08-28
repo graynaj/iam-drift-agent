@@ -4,6 +4,10 @@
 each finding. The rule-based floor wins: the model may raise severity,
 never lower it. Findings are persisted in Firestore keyed by fingerprint,
 so redelivery updates a counter instead of creating a duplicate.
+
+Grants carry a revert_command built from the finding itself. The model
+never sees it and never produces it: the agent stops at a recommendation
+and a human runs the command.
 """
 
 import base64
@@ -38,9 +42,14 @@ def unwrap(envelope):
 
 
 def emit(severity, message, **fields):
-    """Cloud Run turns JSON on stdout into structured log entries."""
-    print(json.dumps({"severity": severity, "message": message, **fields}),
-          flush=True)
+    """Cloud Run turns JSON on stdout into structured log entries.
+
+    Fields whose value is None are dropped, so an inapplicable field is
+    absent from the entry rather than present and empty.
+    """
+    entry = {"severity": severity, "message": message}
+    entry.update({k: v for k, v in fields.items() if v is not None})
+    print(json.dumps(entry), flush=True)
 
 
 @app.post("/audit")
@@ -85,6 +94,7 @@ def audit():
                  level=final, floor=f.floor, rule=f.rule, raised_from=raised,
                  role=f.role, member=f.member_raw, actor=who,
                  reasoning=a.reasoning, recommendation=a.recommendation,
+                 revert_command=f.revert_command,
                  fingerprint=f.fingerprint, insertId=insert_id, msg_id=msg_id,
                  is_new=is_new, times_seen=seen)
 
