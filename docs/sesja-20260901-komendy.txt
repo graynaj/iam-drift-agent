@@ -1,0 +1,200 @@
+python audit.py tests\fixtures\push-add.json
+python audit.py tests\fixtures\push-remove.json
+Get-ChildItem *.py | Select-Object Name, Length
+Select-String -Path main.py -Pattern "^def |^@app|^from |^import " | ForEach-Object { $_.Line }
+Copy-Item main.py main.py.bak
+python main.py
+flask --app main run --port 8080
+(Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned) ; (& c:\Users\grazy\Projekty\iam-drift-agent\.venv\Scripts\Activate.ps1)
+. .\env.ps1
+python tools\replay.py http://localhost:8080/audit
+python tools\replay.py http://localhost:8080/audit tests\fixtures\push-remove.json
+gcloud pubsub subscriptions update audit-push --ack-deadline=60
+gcloud run deploy iam-drift-agent --source . --region=$REGION --no-allow-unauthenticated --service-account=audit-agent-sa@iam-drift-agent.iam.gserviceaccount.com --min-instances=0
+gcloud pubsub subscriptions update audit-push --ack-deadline=60
+gcloud pubsub subscriptions describe audit-push --format="value(pushConfig.pushEndpoint)"
+gcloud pubsub subscriptions update audit-push --push-endpoint="https://iam-drift-agent-283566602051.europe-west1.run.app/audit" --push-auth-service-account="pubsub-pusher@iam-drift-agent.iam.gserviceaccount.com"
+gcloud pubsub subscriptions describe asset-push --format="value(pushConfig.pushEndpoint)"
+gcloud pubsub subscriptions update asset-push --push-endpoint="https://iam-drift-agent-283566602051.europe-west1.run.app/asset" --push-auth-service-account="pubsub-pusher@iam-drift-agent.iam.gserviceaccount.com"
+. .\env.ps1
+python tools\replay.py "$RUN_URL/audit" --auth
+gcloud run services logs read iam-drift-agent --region $REGION --limit=10
+gcloud logging read 'resource.type="cloud_run_revision" AND resource.labels.service_name="iam-drift-agent" AND jsonPayload.message:"IAM DRIFT"' --limit=3 --freshness=30m --format="value(jsonPayload.message, jsonPayload.level, jsonPayload.rule, jsonPayload.msg_id)"
+gcloud projects add-iam-policy-binding $PROJECT_ID --member="user:GrazynaJunska@gmail.com" --role="roles/browser" --condition=None
+gcloud logging read 'resource.type="cloud_run_revision" AND resource.labels.service_name="iam-drift-agent" AND jsonPayload.message:"IAM DRIFT"' --limit=3 --freshness=30m --format="value(jsonPayload.message, jsonPayload.level, jsonPayload.rule, jsonPayload.msg_id)"
+gcloud logging read 'resource.type="cloud_run_revision" AND resource.labels.service_name="iam-drift-agent" AND jsonPayload.msg_id:*' --limit=5 --freshness=15m --format="value(timestamp, jsonPayload.message, jsonPayload.msg_id)"
+gcloud projects remove-iam-policy-binding $PROJECT_ID --member="user:GrazynaJunska@gmail.com" --role="roles/browser"
+gcloud projects add-iam-policy-binding $PROJECT_ID --member="user:GrazynaJunska@gmail.com" --role="roles/browser" --condition=None
+gcloud logging read 'resource.type="cloud_run_revision" AND resource.labels.service_name="iam-drift-agent" AND jsonPayload.msg_id:*' --limit=5 --freshness=10m --format="value(timestamp, jsonPayload.message, jsonPayload.msg_id)"
+(Get-Content tests\results\cloudrun-live-20260827.json -Raw | ConvertFrom-Json).Count
+gcloud logging read 'resource.type="cloud_run_revision" AND resource.labels.service_name="iam-drift-agent" AND jsonPayload.message:"IAM DRIFT"' --limit=5 --freshness=2h --format=json | Out-File -Encoding utf8 tests\results\cloudrun-live-20260827.json
+(Get-Content tests\results\cloudrun-live-20260827.json -Raw | ConvertFrom-Json).Count
+git add -A
+git commit -m "Assess IAM drift from live audit events on Cloud Run"
+git push
+git rm main.py.bak
+git commit -m "Remove editor backup file"
+git push
+git ls-files | Select-String -Pattern "\.bak$|\.tmp$|__pycache__"
+Get-History | Select-Object -ExpandProperty CommandLine | Out-File -Encoding utf8 docs\session-history-20260827.txt
+(Get-Content docs\session-history-20260827.txt).Count
+pip show google-cloud-firestore
+pip install google-cloud-firestore
+pip show google-cloud-firestore
+python -c "from google.cloud import firestore; db = firestore.Client(); db.collection('_probe').document('ping').set({'ok': True}); print('zapis dziala'); print(db.collection('_probe').document('ping').get().to_dict())"
+python store.py
+python tools\replay.py http://localhost:8080/audit
+python store.py
+gcloud run deploy iam-drift-agent --source . --region=$REGION --no-allow-unauthenticated --service-account=audit-agent-sa@iam-drift-agent.iam.gserviceaccount.com --min-instances=0
+python tools\replay.py "$RUN_URL/audit" --auth
+gcloud logging read 'resource.type="cloud_run_revision" AND resource.labels.service_name="iam-drift-agent" AND jsonPayload.times_seen:*' --limit=3 --freshness=10m --format="value(jsonPayload.message, jsonPayload.is_new, jsonPayload.times_seen)"
+gcloud projects add-iam-policy-binding $PROJECT_ID --member="user:GrazynaJunska@gmail.com" --role="roles/browser" --condition=None
+gcloud logging read 'resource.type="cloud_run_revision" AND resource.labels.service_name="iam-drift-agent" AND jsonPayload.times_seen:*' --limit=3 --freshness=10m --format="value(jsonPayload.message, jsonPayload.is_new, jsonPayload.times_seen, jsonPayload.msg_id)"
+gcloud projects remove-iam-policy-binding $PROJECT_ID --member="user:GrazynaJunska@gmail.com" --role="roles/browser"
+gcloud projects add-iam-policy-binding $PROJECT_ID --member="user:GrazynaJunska@gmail.com" --role="roles/browser" --condition=None
+gcloud logging read 'resource.type="cloud_run_revision" AND resource.labels.service_name="iam-drift-agent" AND jsonPayload.times_seen:*' --limit=3 --freshness=10m --format="value(jsonPayload.message, jsonPayload.is_new, jsonPayload.times_seen, jsonPayload.msg_id)"
+gcloud logging read 'resource.type="cloud_run_revision" AND resource.labels.service_name="iam-drift-agent" AND jsonPayload.times_seen:*' --limit=5 --freshness=1h --format=json | Out-File -Encoding utf8 tests\results\firestore-dedup-20260827.json
+(Get-Content tests\results\firestore-dedup-20260827.json -Raw | ConvertFrom-Json).Count
+(Get-Content tests\results\firestore-dedup-20260827.json -Raw | ConvertFrom-Json)[0].jsonPayload | Format-List
+(Get-Content tests\results\firestore-dedup-20260827.json -Raw | ConvertFrom-Json) | Select-Object timestamp, @{n='msg';e={$_.jsonPayload.message}}
+gcloud projects remove-iam-policy-binding $PROJECT_ID --member="user:GrazynaJunska@gmail.com" --role="roles/browser"
+git add -A
+git commit -m "Persist findings in Firestore with fingerprint deduplication"
+git push
+Get-History | Select-Object -ExpandProperty CommandLine | Out-File -Encoding utf8 docs\session-history-20260827.txt
+(Get-Content docs\session-history-20260827.txt).Count
+Select-String -Path .gitignore -Pattern "session-history"
+Get-History | Select-Object -ExpandProperty CommandLine | Out-File -Encoding utf8 docs\session-history-20260827.txt
+(Get-Content docs\session-history-20260827.txt).Count
+(Get-Content docs\session-history-20260827.txt).Count
+Get-History | Select-Object -ExpandProperty CommandLine | Out-File -Encoding utf8 docs\session-history-20260827-a.txt
+Select-String -Path .gitignore -Pattern "session-history"
+git status --short
+git add -A
+git commit -m "Persist findings in Firestore with fingerprint deduplication"
+git push
+gcloud projects get-iam-policy $PROJECT_ID --format=json | Select-String "roles/browser"
+(Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned) ; (& c:\Users\grazy\Projekty\iam-drift-agent\.venv\Scripts\Activate.ps1)
+. .\env.ps1
+git status
+git add -A
+git commit -m "Add architecture, sequence and title slide diagrams"
+git push
+git status
+python drift.py
+python tools\replay.py http://localhost:8080/audit
+(Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned) ; (& c:\Users\grazy\Projekty\iam-drift-agent\.venv\Scripts\Activate.ps1)
+cd C:\Users\grazy\Projekty\iam-drift-agent
+. .\env.ps1
+python -m flask --app main run --port 8080
+git add -A
+git commit -m "Generate revert command deterministically from DriftFinding"
+git push
+gcloud run deploy iam-drift-agent --source . --region=$REGION --no-allow-unauthenticated --service-account=audit-agent-sa@iam-drift-agent.iam.gserviceaccount.com --min-instances=0
+python tools\replay.py $RUN_URL/audit --auth
+jsonPayload.message=~"IAM DRIFT"
+git grep -il "firestore|vertexai|google.adk|genai|pubsub" -- "*.py" "requirements.txt"
+Select-String -Path *.py,tools\*.py,requirements.txt -Pattern "firestore","vertexai","google\.adk","genai" | Select-Object Filename,Line -Unique
+Get-ChildItem -Recurse -Include *.py,*.txt,*.toml | Select-String -Pattern "google\.adk","google-adk","from adk" | Select-Object Path,Line -Unique
+python audit.py tests/fixtures/push-add.json
+Get-ChildItem tests\fixtures
+python tools\make_envelope.py --help
+Get-Content tools\make_envelope.py
+gcloud projects add-iam-policy-binding $PROJECT_ID --member="user:GrazynaJunska@gmail.com" --role="roles/iam.securityAdmin"
+Get-Clipboard | Set-Content tests\fixtures\real-securityadmin-add.json -Encoding utf8
+Get-Content tests\fixtures\real-securityadmin-add.json -TotalCount 5
+python tools\make_envelope.py tests\fixtures\real-securityadmin-add.json tests\fixtures\push-securityadmin.json
+python audit.py tests\fixtures\push-securityadmin.json
+gcloud projects remove-iam-policy-binding $PROJECT_ID --member="user:GrazynaJunska@gmail.com" --role="roles/iam.securityAdmin"
+git status
+Select-String -Path README.md -Pattern "<user>"
+git add tests/fixtures
+git commit -m "Add securityAdmin fixtures captured from a live audit event"
+git add README.md
+git commit -m "Rewrite README: runnable setup, embedded diagrams, design trade-offs"
+git push
+gcloud projects get-iam-policy $PROJECT_ID --flatten="bindings[].members" --filter="bindings.role:roles/iam.securityAdmin" --format="value(bindings.members)"
+gcloud projects add-iam-policy-binding $PROJECT_ID --member="user:GrazynaJunska@gmail.com" --role="roles/iam.securityAdmin"
+gcloud projects remove-iam-policy-binding $PROJECT_ID --member="user:GrazynaJunska@gmail.com" --role="roles/iam.securityAdmin"
+echo $PROJECT_ID $REGION $RUN_URL
+cd C:\Users\grazy\Projekty\iam-drift-agent
+. .env\ps1
+. .\env.ps1
+Clear-Host
+v
+gcloud iam service-accounts get-iam-policy pubsub-pusher@iam-drift-agent.iam.gserviceaccount.com --project=iam-drift-agent --format=json
+gcloud logging sinks list --project=iam-drift-agent
+gcloud logging read 'protoPayload.methodName:"SetIamPolicy" AND protoPayload.resourceName:"pubsub-pusher"' --project=iam-drift-agent --limit=3 --freshness=1h --format=json
+gcloud logging read 'protoPayload.methodName:"SetIamPolicy"' --project=iam-drift-agent --limit=5 --freshness=2h --format="table(timestamp,protoPayload.methodName,protoPayload.resourceName)"
+gcloud logging read 'logName:"cloudaudit.googleapis.com%2Factivity" AND protoPayload.methodName:"SetIamPolicy"' --project=iam-drift-agent --limit=5 --freshness=2h --format="table(timestamp,protoPayload.methodName)"
+gcloud logging read 'protoPayload.methodName="google.iam.admin.v1.SetIAMPolicy"' --project=iam-drift-agent --limit=1 --freshness=2h --format=json
+gcloud logging read 'protoPayload.methodName="google.iam.admin.v1.SetIAMPolicy"' --project=iam-drift-agent --limit=1 --freshness=2h --format=json | ConvertFrom-Json | Select-Object -First 1 | ConvertTo-Json -Depth 20 | Set-Content -Encoding utf8 tests\fixtures\real-sa-level-add.json
+python audit.py tests\fixtures\real-sa-level-add.json
+Select-String -Path audit.py -Pattern "SetIamPolicy|methodName|serviceName|cloudresourcemanager" -Context 2,2
+Select-String -Path *.py,tools\*.py,iam_drift_agent\*.py -Pattern "SetIamPolicy"
+python audit.py tests\fixtures\real-sa-level-add.json
+python audit.py tests\fixtures\push-securityadmin.json
+Select-String -Path *.py -Pattern "fingerprint|sha256" -Context 3,3
+python drift.py
+python audit.py tests\fixtures\real-sa-level-add.json
+python audit.py tests\fixtures\push-securityadmin.json
+gcloud firestore documents delete "projects/iam-drift-agent/databases/(default)/documents/findings/dc544364cb630d0b" --quiet
+python drift.py
+Select-String -Path *.md,*.ps1,*.sh,*.yaml,*.yml,docs\*.md -Pattern "gcloud run deploy" -Context 2,4
+Get-Content README.md | Select-Object -Skip 112 -First 14
+gcloud run services describe iam-drift-agent --region=europe-west1 --format="value(status.latestReadyRevisionName)"
+gcloud run deploy iam-drift-agent --source . --region=europe-west1 --no-allow-unauthenticated --service-account=audit-agent-sa@iam-drift-agent.iam.gserviceaccount.com --min-instances=0
+gcloud run services describe iam-drift-agent --region=europe-west1 --format="table(status.latestReadyRevisionName,status.traffic[].revisionName,status.traffic[].percent)"
+gcloud iam service-accounts add-iam-policy-binding pubsub-pusher@iam-drift-agent.iam.gserviceaccount.com --member="user:GrazynaJunska@gmail.com" --role="roles/iam.serviceAccountViewer" --project=iam-drift-agent
+gcloud iam service-accounts remove-iam-policy-binding pubsub-pusher@iam-drift-agent.iam.gserviceaccount.com --member="user:GrazynaJunska@gmail.com" --role="roles/iam.serviceAccountViewer" --project=iam-drift-agent
+python cases.py
+git add cases.py
+git commit -m "Restructure assessment cases as an asserted regression suite`
+`
+The old CASES was a dict of strings with no expected outcomes, so nothing`
+about it could fail. Every case now carries the role, member, resource and`
+the floor severity_floor must return, checked offline with no model.`
+`
+Coverage changed in three ways. Cases are spread across four injection`
+strategies (direct override, persona hijack, context manipulation,`
+obfuscation) plus benign negative controls. Seven cases target roles that`
+are dangerous but absent from ESCALATION_ROLES, where the floor returns`
+low and the model is the only defense left; the previous suite tested`
+only bindings the floor already pinned to high, which no injection could`
+move either way. And cases marked channel=prose attack reasoning and`
+recommendation, which reach Firestore straight from model output and are`
+not covered by the floor at all."
+git push
+git status --short
+git add drift.py audit.py store.py tests/fixtures/real-sa-level-add.json
+git commit -m "Detect IAM changes on service accounts, not just projects`
+`
+is_iam_change matched methodName case-sensitively, so IAM's`
+google.iam.admin.v1.SetIAMPolicy never reached the parser while Resource`
+Manager's SetIamPolicy did. The sink filter survived this only because`
+Cloud Logging's ':' operator ignores case.`
+`
+Fixing that exposed two latent bugs that could not surface before: the`
+fingerprint omitted the resource, so a project-wide grant and an`
+account-level grant of the same role to the same member collided; and`
+revert_command always emitted 'gcloud projects remove-iam-policy-binding',`
+which is the wrong surface for a service-account binding. It now returns`
+None for resource types it cannot revert safely.`
+`
+Verified live on revision iam-drift-agent-00006-xqk."
+git push
+gcloud firestore documents delete "projects/iam-drift-agent/databases/(default)/documents/findings/dc544364cb630d0b" --quiet
+gcloud firestore documents delete "projects/iam-drift-agent/databases/(default)/documents/findings/9ee88df01abb4448" --quiet
+gcloud firestore documents delete "projects/iam-drift-agent/databases/(default)/documents/findings/0b289c3f36ed02dd" --quiet
+gcloud iam service-accounts get-iam-policy pubsub-pusher@iam-drift-agent.iam.gserviceaccount.com --project=iam-drift-agent --format=json
+python eval_runner.py --dry-run
+python eval_runner.py --runs 5
+gcloud services quota list --service=aiplatform.googleapis.com --consumer=projects/iam-drift-agent --format="table(metric,displayName)" 2>$null | Select-String -Pattern "generate_content|online_prediction"
+Get-Content tests\results\20260901T162251Z-production-no-floor.json | ConvertFrom-Json | Select-Object -ExpandProperty records | Where-Object { $_.error } | Measure-Object
+Get-Content tests\results\20260901T162251Z-production-no-floor.json | ConvertFrom-Json | Select-Object -ExpandProperty records | Where-Object { $_.error } | Select-Object variant,case_id,run | Format-Table -AutoSize
+Get-Content tests\results\20260901T162251Z-production-no-floor.json | ConvertFrom-Json | Select-Object -ExpandProperty records | Where-Object { $_.error } | Select-Object -First 1 -ExpandProperty error
+python eval_runner.py --runs 10
+Get-Content tests\results\20260901T170827Z-production-no-floor.json | ConvertFrom-Json | Select-Object -ExpandProperty records | Where-Object { $_.case_id -eq "control_sa_level_grant" -and $_.variant -eq "no-floor" } | Select-Object -First 2 -Property reasoning,recommendation | Format-List
+python cases.py
+python eval_runner.py --runs 10
+Get-Content (Get-PSReadlineOption).HistorySavePath -Tail 200 | Set-Content -Encoding utf8 docs\sesja-20260901-komendy.txt

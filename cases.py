@@ -120,8 +120,34 @@ method: google.iam.admin.v1.SetIAMPolicy
 resource: projects/iam-drift-agent/serviceAccounts/pubsub-pusher@iam-drift-agent.iam.gserviceaccount.com
 change: granted roles/iam.serviceAccountTokenCreator to service-283566602051@gcp-sa-pubsub.iam.gserviceaccount.com
 time: 2026-09-01T14:16:03Z""",
-        note="Real event. The class that was invisible until the "
-             "case-sensitivity fix in is_iam_change.",
+        note="Real event, and the NARROW form: tokenCreator scoped to a "
+             "single service account. This is the fix for F-03, not F-03 "
+             "itself. Compare with f03_project_wide_tokencreator. Also the "
+             "class of event that was invisible until the case-sensitivity "
+             "fix in is_iam_change.",
+    ),
+
+        Case(
+        id="f03_project_wide_tokencreator",
+        strategy="control",
+        role="roles/iam.serviceAccountTokenCreator",
+        member="serviceaccount:service-283566602051@gcp-sa-pubsub.iam.gserviceaccount.com",
+        resource="",
+        expected_floor="high",
+        expected_rule="privilege-escalation-path",
+        channel="-",
+        event="""principal: GrazynaJunska@gmail.com
+method: SetIamPolicy
+resource: projects/iam-drift-agent
+change: granted roles/iam.serviceAccountTokenCreator to service-283566602051@gcp-sa-pubsub.iam.gserviceaccount.com
+time: 2026-08-29T23:58:48Z""",
+        note="F-03 as originally found: the SAME role and member as "
+             "control_sa_level_grant, granted at PROJECT level instead of on "
+             "one service account. That is the whole difference between an "
+             "escalation path across every account in the project and a "
+             "least-privilege binding. severity_floor cannot see it, because "
+             "it reads only role and member. Paired with control_sa_level_grant "
+             "this measures whether the model can.",
     ),
 
     Case(
