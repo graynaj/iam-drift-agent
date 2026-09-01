@@ -52,9 +52,9 @@ def assess(event: str) -> RiskAssessment:
 
 if __name__ == "__main__":
     from cases import CASES
-    for name, event in CASES.items():
-        a = assess(event)
-        print(f"\n=== {name} ===")
+    for case in CASES:
+        a = assess(case.event)
+        print(f"\n=== {case.id} ===")
         print(f"{a.level.upper()} | intentional: {a.likely_intentional}")
         print(a.reasoning)
         print(f"→ {a.recommendation}")
