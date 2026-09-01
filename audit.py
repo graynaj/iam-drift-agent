@@ -49,9 +49,34 @@ def actor(entry: dict) -> str:
     return (payload.get("authenticationInfo") or {}).get("principalEmail", "unknown")
 
 
-def is_iam_change(entry: dict) -> bool:
+def resource_name(entry: dict) -> str:
+    """Fully-qualified resource whose policy changed.
+
+    resourceName is authoritative, but for service accounts it uses the
+    placeholder form projects/-/serviceAccounts/<numeric-id>: no project,
+    no email, unusable in a command. In that case request.resource carries
+    the readable path, so fall back to it.
+    """
     payload = entry.get("protoPayload") or {}
-    return payload.get("methodName", "").endswith("SetIamPolicy")
+    name = payload.get("resourceName", "") or ""
+    if "/-/" in name:
+        request = payload.get("request") or {}
+        readable = request.get("resource")
+        if isinstance(readable, str) and readable:
+            return readable
+    return name
+
+
+def is_iam_change(entry: dict) -> bool:
+    """Match SetIamPolicy across services.
+
+    Resource Manager logs it as "SetIamPolicy"; IAM logs the same operation
+    as "google.iam.admin.v1.SetIAMPolicy", with different capitalisation.
+    The Cloud Logging sink filter survives this because its ":" operator is
+    case-insensitive. Python is not, so compare in lower case.
+    """
+    payload = entry.get("protoPayload") or {}
+    return payload.get("methodName", "").lower().endswith("setiampolicy")
 
 
 def to_findings(entry: dict) -> list[DriftFinding]:
@@ -60,6 +85,7 @@ def to_findings(entry: dict) -> list[DriftFinding]:
         return []
 
     known = baseline_pairs()
+    resource = resource_name(entry)
     findings = []
     for delta in binding_deltas(entry):
         action = (delta.get("action") or "").upper()
@@ -73,9 +99,13 @@ def to_findings(entry: dict) -> list[DriftFinding]:
             if (role, member) in known:
                 continue  # in baseline: known state, not drift
             floor, rule = severity_floor(role, member)
-            findings.append(DriftFinding("granted", role, member, floor, rule, raw))
+            findings.append(
+                DriftFinding("granted", role, member, floor, rule, raw, resource)
+            )
         elif action in REVOKE_ACTIONS:
-            findings.append(DriftFinding("revoked", role, member, "low", "none", raw))
+            findings.append(
+                DriftFinding("revoked", role, member, "low", "none", raw, resource)
+            )
     return findings
 
 
@@ -88,6 +118,9 @@ if __name__ == "__main__":
 
     print(f"actor: {actor(entry)}")
     print(f"iam change: {is_iam_change(entry)}")
+    print(f"resource: {resource_name(entry)}")
     print(f"raw deltas: {len(binding_deltas(entry))}")
     for f in to_findings(entry):
         print(f"  [{f.floor:8}] {f.change} {f.role} -> {f.member_raw} ({f.rule})")
+        if f.revert_command:
+            print(f"           revert: {f.revert_command}")

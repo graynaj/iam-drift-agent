@@ -71,35 +71,69 @@ class DriftFinding:
     floor: str                 # deterministic minimum severity
     rule: str                  # which rule set the floor, or "none"
     member_raw: str = ""       # original spelling: display and commands
+    resource: str = ""         # resource whose policy changed; "" = project
+
+    @property
+    def target(self) -> str:
+        """Resource whose policy changed.
+
+        The same role and member can be granted at project level and on a
+        single service account. Those are different changes with different
+        blast radius, so the resource has to travel with the finding.
+        Empty means project level, which is what findings built from
+        policy snapshots carry.
+        """
+        return self.resource or f"projects/{PROJECT_ID}"
 
     @property
     def fingerprint(self) -> str:
         """Stable id for deduplication across repeated deliveries."""
-        raw = f"{self.change}|{self.role}|{self.member}"
+        raw = f"{self.change}|{self.role}|{self.member}|{self.target}"
         return hashlib.sha256(raw.encode()).hexdigest()[:16]
 
     @property
     def revert_command(self) -> str | None:
-        """Undo line for a grant, or None when there is nothing to undo.
+        """Undo line for a grant, or None when no safe command exists.
 
         Built only from fields of this finding. Model output is never an
         input here, so the assessment cannot influence what a human runs.
         Revocations return None so the field stays absent from the log
         rather than appearing as an empty value.
+
+        Determinism guarantees repeatability, not correctness: the command
+        must match the resource the binding actually sits on. For resource
+        types this function does not know how to revert, it returns None.
+        An operator running nothing is better off than an operator running
+        a confident command aimed at the wrong resource.
         """
         if self.change != "granted":
             return None
+
         member = self.member_raw or self.member
-        return (
-            f"gcloud projects remove-iam-policy-binding {PROJECT_ID} "
-            f'--member="{member}" --role="{self.role}"'
-        )
+        parts = self.target.split("/")
+
+        if len(parts) == 4 and parts[0] == "projects" and parts[2] == "serviceAccounts":
+            project, account = parts[1], parts[3]
+            if project == "-" or "@" not in account:
+                return None  # placeholder form: no usable command
+            return (
+                f"gcloud iam service-accounts remove-iam-policy-binding {account} "
+                f'--member="{member}" --role="{self.role}" --project={project}'
+            )
+
+        if len(parts) == 2 and parts[0] == "projects" and parts[1] != "-":
+            return (
+                f"gcloud projects remove-iam-policy-binding {parts[1]} "
+                f'--member="{member}" --role="{self.role}"'
+            )
+
+        return None
 
     def as_event(self) -> str:
         """Render for the LLM assessment prompt."""
         return (
             f"change: {self.change} {self.role} to {self.member}\n"
-            f"resource: projects/{PROJECT_ID}\n"
+            f"resource: {self.target}\n"
             f"deterministic_floor: {self.floor} ({self.rule})"
         )
 
@@ -140,20 +174,62 @@ def _self_check() -> None:
     revoked = DriftFinding(
         "revoked", "roles/browser", "user:someone@example.com", "low", "none",
     )
+    sa_level = DriftFinding(
+        "granted", "roles/iam.serviceAccountTokenCreator",
+        "serviceaccount:service-283566602051@gcp-sa-pubsub.iam.gserviceaccount.com",
+        "high", "privilege-escalation-path",
+        "serviceAccount:service-283566602051@gcp-sa-pubsub.iam.gserviceaccount.com",
+        "projects/iam-drift-agent/serviceAccounts/pubsub-pusher@iam-drift-agent.iam.gserviceaccount.com",
+    )
+    placeholder = DriftFinding(
+        "granted", "roles/iam.serviceAccountTokenCreator",
+        "serviceaccount:someone@example.com", "high", "privilege-escalation-path",
+        "serviceAccount:someone@example.com",
+        "projects/-/serviceAccounts/114250812770448954199",
+    )
+    unknown = DriftFinding(
+        "granted", "roles/storage.objectViewer", "allusers", "critical",
+        "public-principal", "allUsers", "buckets/some-public-bucket",
+    )
 
     print(f"project: {PROJECT_ID}\n")
-    print("granted (with member_raw):")
+    print("granted at project level (with member_raw):")
     print(f"  {granted.revert_command}\n")
     print("granted (no member_raw, older finding):")
     print(f"  {legacy.revert_command}\n")
+    print("granted on a service account:")
+    print(f"  {sa_level.revert_command}\n")
     print("revoked (must be None):")
-    print(f"  {revoked.revert_command}")
+    print(f"  {revoked.revert_command}\n")
+    print("placeholder resource, no usable command (must be None):")
+    print(f"  {placeholder.revert_command}\n")
+    print("unsupported resource type (must be None):")
+    print(f"  {unknown.revert_command}\n")
 
     assert granted.revert_command.count("\n") == 0, "must be a single line"
     assert "GrazynaJunska" in granted.revert_command, "must use original case"
     assert legacy.revert_command is not None, "must fall back to member"
     assert revoked.revert_command is None, "revocations have no revert"
-    print("\nOK")
+
+    assert sa_level.revert_command is not None, "service accounts must revert"
+    assert "iam service-accounts" in sa_level.revert_command, "wrong gcloud surface"
+    assert "pubsub-pusher@" in sa_level.revert_command, "must target the account"
+    assert sa_level.revert_command.count("\n") == 0, "must be a single line"
+
+    assert placeholder.revert_command is None, "no command from a placeholder id"
+    assert unknown.revert_command is None, "no command for unknown resource types"
+
+    assert granted.fingerprint != sa_level.fingerprint, "resource must separate"
+    same_binding_project = DriftFinding(
+        "granted", "roles/iam.serviceAccountTokenCreator",
+        "serviceaccount:service-283566602051@gcp-sa-pubsub.iam.gserviceaccount.com",
+        "high", "privilege-escalation-path",
+    )
+    assert same_binding_project.fingerprint != sa_level.fingerprint, (
+        "project-wide and account-level grants must not collide"
+    )
+
+    print("OK")
 
 
 if __name__ == "__main__":
@@ -170,5 +246,6 @@ if __name__ == "__main__":
         mark = "+" if f.change == "granted" else "-"
         print(f"{mark} [{f.floor:8}] {f.role}")
         print(f"             {f.member}  ({f.rule}, {f.fingerprint})")
+        print(f"             on {f.target}")
         if f.revert_command:
             print(f"             revert: {f.revert_command}")

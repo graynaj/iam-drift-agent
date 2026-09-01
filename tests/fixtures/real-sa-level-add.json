@@ -1,0 +1,90 @@
+{
+  "insertId": "17k9qgqebgxh0",
+  "logName": "projects/iam-drift-agent/logs/cloudaudit.googleapis.com%2Factivity",
+  "protoPayload": {
+    "@type": "type.googleapis.com/google.cloud.audit.AuditLog",
+    "authenticationInfo": {
+      "oauthInfo": {
+        "oauthClientId": "32555940559.apps.googleusercontent.com"
+      },
+      "principalEmail": "GrazynaJunska@gmail.com",
+      "principalSubject": "user:GrazynaJunska@gmail.com"
+    },
+    "authorizationInfo": [
+      {
+        "granted": true,
+        "permission": "iam.serviceAccounts.setIamPolicy",
+        "permissionType": "ADMIN_WRITE",
+        "resource": "projects/-/serviceAccounts/114250812770448954199",
+        "resourceAttributes": {
+          "name": "projects/-/serviceAccounts/114250812770448954199"
+        }
+      }
+    ],
+    "methodName": "google.iam.admin.v1.SetIAMPolicy",
+    "request": {
+      "@type": "type.googleapis.com/google.iam.v1.SetIamPolicyRequest",
+      "policy": {
+        "bindings": [
+          {
+            "members": [
+              "serviceAccount:service-283566602051@gcp-sa-pubsub.iam.gserviceaccount.com"
+            ],
+            "role": "roles/iam.serviceAccountTokenCreator"
+          }
+        ],
+        "etag": "ACAB",
+        "version": 3
+      },
+      "resource": "projects/iam-drift-agent/serviceAccounts/pubsub-pusher@iam-drift-agent.iam.gserviceaccount.com"
+    },
+    "requestMetadata": {
+      "callerIp": "78.30.81.117",
+      "callerSuppliedUserAgent": "google-cloud-sdk gcloud/581.0.0 command/gcloud.iam.service-accounts.add-iam-policy-binding invocation-id/e3b02cff868e407b808e995607b88f1f environment/None environment-version/None client-os/WINDOWS client-os-ver/10.0.26200 client-pltf-arch/x86_64 interactive/True from-script/False python/3.14.6 term/  (Windows NT 10.0.26200),gzip(gfe)",
+      "destinationAttributes": {},
+      "requestAttributes": {
+        "auth": {},
+        "time": "2026-09-01T14:16:04.324583075Z"
+      }
+    },
+    "resourceName": "projects/-/serviceAccounts/114250812770448954199",
+    "response": {
+      "@type": "type.googleapis.com/google.iam.v1.Policy",
+      "bindings": [
+        {
+          "members": [
+            "serviceAccount:service-283566602051@gcp-sa-pubsub.iam.gserviceaccount.com"
+          ],
+          "role": "roles/iam.serviceAccountTokenCreator"
+        }
+      ],
+      "etag": "BwZabI8dcNY=",
+      "version": 1
+    },
+    "serviceData": {
+      "@type": "type.googleapis.com/google.iam.v1.logging.AuditData",
+      "policyDelta": {
+        "bindingDeltas": [
+          {
+            "action": "ADD",
+            "member": "serviceAccount:service-283566602051@gcp-sa-pubsub.iam.gserviceaccount.com",
+            "role": "roles/iam.serviceAccountTokenCreator"
+          }
+        ]
+      }
+    },
+    "serviceName": "iam.googleapis.com",
+    "status": {}
+  },
+  "receiveTimestamp": "2026-09-01T14:16:05.891201216Z",
+  "resource": {
+    "labels": {
+      "email_id": "pubsub-pusher@iam-drift-agent.iam.gserviceaccount.com",
+      "project_id": "iam-drift-agent",
+      "unique_id": "114250812770448954199"
+    },
+    "type": "service_account"
+  },
+  "severity": "NOTICE",
+  "timestamp": "2026-09-01T14:16:03.890724443Z"
+}
